@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: designs
+    // Document ID: auto-generated
+    // Fields:
+    //   - system_name: string (required)
+    //   - description: string (required)
+    //   - architecture: map (required)
+    //   - components: list (required)
+    //   - connections: list (required)
+    //   - features: list (required)
+    //   - user_flow: list (required)
+    //   - tech_stack: map (required)
+    //   - folder_structure: list (required)
+    //   - code_samples: map (required)
+    //   - explanation: string (required)
+    //   - createdAt: timestamp (required)
+    //   - updatedAt: timestamp (required)
+    //   - authorId: string (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidDesign(data) {
+      return data.keys().hasAll(['system_name', 'description', 'architecture', 'components', 'connections', 'features', 'user_flow', 'tech_stack', 'folder_structure', 'code_samples', 'explanation', 'createdAt', 'updatedAt', 'authorId']) &&
+             data.system_name is string && data.system_name.size() > 0 && data.system_name.size() < 200 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.architecture is map &&
+             data.components is list &&
+             data.connections is list &&
+             data.features is list &&
+             data.user_flow is list &&
+             data.tech_stack is map &&
+             data.folder_structure is list &&
+             data.code_samples is map &&
+             data.explanation is string &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             data.authorId is string;
+    }
+
+    match /designs/{designId} {
+      // Allow anyone to read designs (for collaboration via link)
+      allow read: if true;
+      // Allow authenticated (including anonymous) users to create
+      allow create: if isAuthenticated() && isValidDesign(request.resource.data) && request.resource.data.authorId == request.auth.uid;
+      // Allow anyone to update if they have the ID (collaboration)
+      // In a real app, we might want more control, but for "no sign in" collaboration:
+      allow update: if isAuthenticated() && isValidDesign(request.resource.data);
+      allow delete: if isAuthenticated() && isOwner(resource.data.authorId);
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "SystemDesign": {
+      "title": "System Design",
+      "description": "A complete software system architecture design.",
+      "type": "object",
+      "properties": {
+        "system_name": { "type": "string" },
+        "description": { "type": "string" },
+        "architecture": {
+          "type": "object",
+          "properties": {
+            "overview": { "type": "string" },
+            "type": { "type": "string", "enum": ["monolith", "microservices"] }
+          },
+          "required": ["overview", "type"]
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string", "enum": ["frontend", "backend", "database", "service"] },
+              "responsibility": { "type": "string" }
+            },
+            "required": ["id", "name", "type", "responsibility"]
+          }
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "data_flow": { "type": "string" }
+            },
+            "required": ["from", "to", "data_flow"]
+          }
+        },
+        "features": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "user_flow": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "step": { "type": "string" },
+              "action": { "type": "string" }
+            },
+            "required": ["step", "action"]
+          }
+        },
+        "tech_stack": {
+          "type": "object",
+          "properties": {
+            "frontend": { "type": "string" },
+            "backend": { "type": "string" },
+            "database": { "type": "string" },
+            "other_tools": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["frontend", "backend", "database", "other_tools"]
+        },
+        "folder_structure": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "purpose": { "type": "string" }
+            },
+            "required": ["path", "purpose"]
+          }
+        },
+        "code_samples": {
+          "type": "object",
+          "properties": {
+            "frontend": { "type": "string" },
+            "backend": { "type": "string" }
+          },
+          "required": ["frontend", "backend"]
+        },
+        "explanation": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "authorId": { "type": "string" }
+      },
+      "required": [
+        "system_name", "description", "architecture", "components", 
+        "connections", "features", "user_flow", "tech_stack", 
+        "folder_structure", "code_samples", "explanation", "createdAt", "updatedAt", "authorId"
+      ]
+    }
+  },
+  "firestore": {
+    "/designs/{designId}": {
+      "schema": "SystemDesign",
+      "description": "Shared system designs for real-time collaboration."
+    }
+  }
+}
